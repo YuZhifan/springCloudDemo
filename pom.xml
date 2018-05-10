@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>eureka-cloud</name>
+    <name>spring-cloud</name>
     <description>Demo project for Spring Cloud</description>
 
     <modules>
