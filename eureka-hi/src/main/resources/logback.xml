@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" packages="cn.com.crc.ripplescloud.common.base.config">
+    <!--<property resource="application.properties"/>-->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"/>
+    <!--<property name="APP_NAME" value="eureka-service"></property>&ndash;&gt;-->
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+        <file>logs/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/${APP_NAME}.log.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+
+    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <param name="Encoding" value="UTF-8"/>
+        <!--logstash地址-->
+        <destination>192.168.252.128:4560</destination>
+        <!--连接策略-->
+        <!--<connectionStrategy>-->
+            <!--&lt;!&ndash;首要连接&ndash;&gt;-->
+            <!--<preferPrimary>-->
+                <!--<secondaryConnectionTTL>5 minutes</secondaryConnectionTTL>-->
+            <!--</preferPrimary>-->
+            <!--&lt;!&ndash;轮询&ndash;&gt;-->
+            <!--&lt;!&ndash;<roundRobin>&ndash;&gt;-->
+            <!--&lt;!&ndash;<connectionTTL>5 minutes</connectionTTL>&ndash;&gt;-->
+            <!--&lt;!&ndash;</roundRobin>&ndash;&gt;-->
+            <!--&lt;!&ndash;随机&ndash;&gt;-->
+            <!--<random>-->
+                <!--<connectionTTL>5 minutes</connectionTTL>-->
+            <!--</random>-->
+        <!--</connectionStrategy>-->
+        <!--重连延迟-->
+        <reconnectionDelay>1 second</reconnectionDelay>
+        <!--写入缓冲区的大小-->
+        <writeBufferSize>16384</writeBufferSize>
+
+        <!--<destination>192.168.252.128</destination>-->
+        <!--<port>4560</port>-->
+        <!-- encoder is required -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeCallerData>true</includeCallerData>
+            <customFields>
+                {"appname":"${APP_NAME}"}
+            </customFields>
+        </encoder>
+        <keepAliveDuration>5 minutes</keepAliveDuration>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 指定输出格式
+                %d{} :表示时间
+                %thread:请求记录所在的线程名
+                %-5level：用5位显示请求级别
+                %logger{36}：输出logger名，{36}表示logger名最大占用的字符位数，{0}表示最简短logger名（不包含包名）。
+             -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%msg%n</pattern>
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}%ip [%thread] %-5level %logger{36} -%msg%n</pattern>-->
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="logstash"/>
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="file"/>
+    </root>
+</Configuration>
